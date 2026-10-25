@@ -20,6 +20,7 @@ Automated end-to-end tests for the ToDo application from [cypress-example-kitche
 9. [Conventions and standards](#conventions-and-standards)
 10. [Quality findings](#quality-findings)
 11. [What I would improve with more time](#what-i-would-improve-with-more-time)
+12. [Source of the application](#source-of-the-application)
 
 ---
 
@@ -38,6 +39,8 @@ Automated end-to-end tests for the ToDo application from [cypress-example-kitche
 | P2 | All UI elements present, focus on load, default filter | `todoRead` |
 | P2 | HTML / script input rendered as text (XSS regression) | `todoSecurity` |
 | – | Reported defects (expected behaviour, marked `test.fail`) | `knownIssues` |
+
+**Size:** 44 tests × 4 projects (Chromium, Firefox, WebKit, mobile Chrome) = 176 test runs per execution.
 
 **Assumptions.**
 - No requirements were provided. The [TodoMVC app specification](https://github.com/tastejs/todomvc/blob/master/app-spec.md) is used as the expected-behaviour baseline, because the app is a declared fork of TodoMVC.
@@ -292,6 +295,8 @@ The Playwright `list` reporter is kept for readable console and CI logs, and the
 ---
 
 ## Quality findings
+
+Full details (steps to reproduce, expected/actual, root cause, suggested fix) are in [FINDINGS.md](FINDINGS.md).
 
 | # | Finding | Type | Severity | Issue |
 | --- | --- | --- | --- | --- |
