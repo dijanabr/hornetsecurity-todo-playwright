@@ -7,14 +7,13 @@ No requirements were provided, so the [TodoMVC app specification](https://github
 
 | # | Finding | Type | Severity | Issue |
 | --- | --- | --- | --- | --- |
-| 1 | Duplicate todo IDs – toggling or deleting one todo changes another | Defect | High | [#1](https://github.com/dijanabr/hornetsecurity-todo-playwright/issues/1) |
-| 2 | Unknown or wrongly-cased route in URL throws errors and breaks filter navigation | Defect | Medium | [#2](https://github.com/dijanabr/hornetsecurity-todo-playwright/issues/2) |
-| 3 | Deleted default todos reappear after reload | Defect | Low | [#3](https://github.com/dijanabr/hornetsecurity-todo-playwright/issues/3) |
-| 4 | No maximum length on todo text – very long text breaks the layout | Defect | Medium | – |
-| 5 | New todo is created on blur, not only on Enter | Question for PO | – | – |
-| 6 | Missing `data-test` attributes | Testability | – | – |
-| 7 | Todo checkboxes have no accessible name | Accessibility | Low | – |
-| 8 | Default todos get time-based IDs, so the start state is not predictable | Testability | – | – |
+| 1 | Duplicate todo IDs – toggling or deleting one todo changes another | Bug | High | [#1](https://github.com/dijanabr/hornetsecurity-todo-playwright/issues/1) |
+| 2 | Unknown or wrongly-cased route in URL throws errors and breaks filter navigation | Bug | Medium | [#2](https://github.com/dijanabr/hornetsecurity-todo-playwright/issues/2) |
+| 3 | Deleted default todos reappear after reload | Bug | Low | [#3](https://github.com/dijanabr/hornetsecurity-todo-playwright/issues/3) |
+| 4 | No maximum length on todo text – very long text breaks the layout | Bug | Medium | – |
+| 5 | New todo is created when the input loses focus, not only on Enter | Question for PO | – | – |
+| 6 | Few stable locators (missing `data-test` attributes) | Testability | – | – |
+| 7 | Default todos get time-based IDs, so the start state is not predictable | Testability | – | – |
 | ✔ | HTML / script input is shown as text (no XSS) | Verified OK | – | – |
 
 ---
@@ -43,20 +42,17 @@ A text of 10,000+ characters (lorem ipsum) is accepted. The item becomes extreme
 
 ## Question for the product owner
 
-### 5. New todo is created on blur, not only on Enter
+### 5. New todo is created when the input loses focus, not only on Enter
 Typing a text and clicking anywhere else on the page creates the todo. The TodoMVC spec says a todo is created with Enter. This can create todos by accident. **Is this intended?**
 
 ---
 
-## Testability and accessibility
+## Testability
 
-### 6. Missing `data-test` attributes
+### 6. Few stable locators
 Only the "What needs to be done?" input has a `data-test` attribute. The list, items, counter and footer must be located with CSS classes, so a design change can break the tests even when the app works.
 
-### 7. Todo checkboxes have no accessible name
-The checkbox of each todo has no label, so a screen reader only says "checkbox" without the todo title. The "Mark all as complete" checkbox has a proper label.
-
-### 8. Unpredictable start state
+### 7. Unpredictable start state
 On every first load the app adds two default todos, and their IDs depend on timing (see #1). Tests that rely on this data would be flaky, so the test suite writes its own todos into Local Storage before the app loads.
 
 ---

@@ -52,7 +52,6 @@ export class TodoPage extends BasePage {
         return this.footer.getByRole('link', { name, exact: true });
     }
 
-    // ---------- Actions ----------
     public async open() {
         await this.navigateTo('/todo');
     }
@@ -99,5 +98,4 @@ export class TodoPage extends BasePage {
     public async filterBy(name: FilterName) {
         await this.clickElement(this.filterLink(name));
     }
-
 }

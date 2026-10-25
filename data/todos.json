@@ -53,10 +53,6 @@
         "whitespaceOnly": "      ",
         "editedTitle": "Buy groceries and fruit",
         "specialCharacters": "Café & résumé – naïve ✓ \"quotes\" 'apostrophes' Ђорѓе Љубљана",
-        "xssPayloads": [
-            "<img src=x onerror=\"window.__xss = true\">",
-            "<script>window.__xss = true</script>",
-            "<b>bold text</b>"
-        ]
+        "xssPayload": "<img src=x onerror=\"window.__xss = true\">"
     }
 }

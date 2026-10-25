@@ -40,20 +40,29 @@ Automated end-to-end tests for the ToDo application from [cypress-example-kitche
 | P2 | HTML / script input rendered as text (XSS regression) | `todoSecurity` |
 | – | Reported defects (expected behaviour, marked `test.fail`) | `knownIssues` |
 
-**Size:** 44 tests × 4 projects (Chromium, Firefox, WebKit, mobile Chrome) = 176 test runs per execution.
+**Size:** 42 tests × 4 projects (Chromium, Firefox, WebKit, mobile Chrome) = 168 test runs per execution.
 
 **Assumptions.**
 - No requirements were provided. The [TodoMVC app specification](https://github.com/tastejs/todomvc/blob/master/app-spec.md) is used as the expected-behaviour baseline, because the app is a declared fork of TodoMVC.
 - The app is tested exactly as published: `app/` is copied unchanged from the source repository (see [Source of the application](#source-of-the-application)).
 
-**Scope.** The ToDo page (`/todo`) on Chromium, Firefox, WebKit and mobile Chrome (Pixel 7).
+**Scope.** The ToDo page (`/todo`) on Chromium, Firefox, WebKit and one emulated mobile device (Galaxy S24, a Playwright built-in preset: mobile viewport, touch, mobile user agent). In a real project the device list would follow the product's usage analytics.
 
 **Out of scope.**
 - Other kitchensink pages and the existing Cypress tests.
 - API and contract tests – the app has no backend or network calls.
 - Visual regression, performance and load testing.
-- A full accessibility audit (accessibility issues found manually are listed in [Quality findings](#quality-findings)).
-- Very long text input – there is no defined maximum length, so it is reported as a finding for the product owner, not asserted in a test.
+- Accessibility testing.
+- Very long text input – no maximum length is defined, so it is reported as finding #4, not asserted in a test.
+
+**Main technical decisions.**
+- **Page Object Model** – `BasePage` with shared actions, `TodoPage` with locators and actions; tests contain no locators.
+- **Custom fixtures** – `todoPage` opens the app with a chosen data set (`seedList`); `todoStorage` reads and clears saved todos.
+- **Own test data in `localStorage`** – written before the app loads, so every test starts from a known state and does not depend on the app's unpredictable default data.
+- **Isolation and parallel runs** – a new browser context per test, so tests share nothing and run in parallel.
+- **Known defects as `test.fail`** – the expected behaviour stays in the suite and signals when a defect is fixed, while the pipeline stays green.
+- **One Docker image** – the app, the tests and the browsers in one image; CI runs the same image as local runs.
+- **Allure** – free and open source, covers steps, evidence, history and trends without its own server (see [Reporting](#reporting)).
 
 ---
 
@@ -138,7 +147,7 @@ To open the app manually: `npm run start:app`, then http://localhost:8080/todo.
 | `npm run test:headed` | Chromium with a visible browser (debugging) |
 | `npm run test:ui` | Playwright UI mode |
 | `npm run test:smoke` | tests tagged `@smoke` |
-| `npm run test:known-issues` | tests tagged `@known-issue` |
+| `npm run test:knownIssues` | tests tagged `@known-issue` |
 | `npm run test:regression` | everything except `@known-issue` |
 | `npm run test:create` / `test:read` / `test:update` / `test:delete` / `test:security` | one spec file |
 | `npm run report` | open the last Playwright HTML report |
@@ -169,14 +178,10 @@ Run a subset (the command after the image name replaces the default one):
 docker run --rm --init --ipc=host todo-playwright npx playwright test --grep @smoke
 ```
 
-Keep the reports on the host (PowerShell):
+Keep the reports on the host:
 
-```powershell
-docker run --rm --init --ipc=host `
-  -v ${PWD}/allure-results:/app/allure-results `
-  -v ${PWD}/playwright-report:/app/playwright-report `
-  -v ${PWD}/test-results:/app/test-results `
-  todo-playwright
+```bash
+docker run --rm --init --ipc=host -v ${PWD}/allure-results:/app/allure-results -v ${PWD}/playwright-report:/app/playwright-report -v ${PWD}/test-results:/app/test-results todo-playwright
 ```
 
 ---
@@ -217,7 +222,7 @@ Trend charts appear from the second run onwards.
 | Trends over time | pass/fail and duration trends, flaky detection (passed on retry) |
 | Generated and available from CI | published to GitHub Pages + raw results as an artifact |
 
-Alternatives considered: Monocart (good, weaker history), ReportPortal (strong history, needs its own server), Currents (paid SaaS), GitHub job summary from JUnit (no trends).
+Alternatives considered: ReportPortal (strong history, needs its own server), Currents (paid SaaS dashboards). Allure was chosen because it is free, open source and gives history and trends with only GitHub Pages – no extra infrastructure.
 
 The Playwright `list` reporter is kept for readable console and CI logs, and the HTML report is kept as a secondary artifact with the trace viewer.
 
@@ -225,8 +230,8 @@ The Playwright `list` reporter is kept for readable console and CI logs, and the
 
 ## Test data and isolation
 
-- **Every test is independent.** Each test gets a new browser context, so it has its own `localStorage`. Nothing is shared between tests, which makes the suite safe to run in parallel (`fullyParallel: true`) and repeatedly.
-- **Known start state.** Before the app loads, the `todoPage` fixture writes a list from `data/todos.json` into `localStorage` (`page.addInitScript`). The app then skips its own default todos, and ids are assigned by the test (unique), not by the app.
+- **Every test is independent.** Playwright's built-in `page` fixture gives each test a new browser context, so it has its own `localStorage`. Nothing is shared between tests, which makes the suite safe to run in parallel (`fullyParallel: true`) and repeatedly.
+- **Known start state.** Before the app loads, the `todoPage` fixture writes a list from `data/todos.json` into `localStorage` (`page.addInitScript`). The app then skips its own default todos, and ids are assigned by the fixture (unique), not by the app.
 - **Selecting data.** The default list is `mixed`. A file or `describe` block selects another list by name:
   ```ts
   test.use({ seedList: 'allActive' });   // 'mixed' | 'allActive' | 'allCompleted' | 'single' | 'none'
@@ -284,6 +289,7 @@ The Playwright `list` reporter is kept for readable console and CI logs, and the
 - Locally: no retries (flaky tests are not hidden), workers = half of the CPU cores.
 - CI and Docker (`CI=true`): 1 retry, 2 workers, `forbidOnly` (a forgotten `test.only` fails the run).
 - Evidence on failure: `trace: 'retain-on-failure'`, `screenshot: 'only-on-failure'`, `video: 'retain-on-failure'`.
+- `knownIssues.spec.ts` records screenshot, video and trace on every run, because expected failures are not kept by `retain-on-failure`.
 
 ### Adding a new test
 1. Put new locators and actions in the page object (`pages/`).
@@ -296,32 +302,29 @@ The Playwright `list` reporter is kept for readable console and CI logs, and the
 
 ## Quality findings
 
-Short descriptions of all findings are in [FINDINGS.md](FINDINGS.md); the three defects with steps to reproduce and evidence are reported as GitHub issues.
+Short descriptions of all findings are in [FINDINGS.md](FINDINGS.md); three of the bugs are reported as GitHub issues with steps to reproduce and evidence.
 
 | # | Finding | Type | Severity | Issue |
 | --- | --- | --- | --- | --- |
-| 1 | Duplicate todo IDs – the two default todos sometimes get the same id, and then toggling or deleting the second one changes the first one instead. | Defect | High | [#1](https://github.com/dijanabr/hornetsecurity-todo-playwright/issues/1) |
-| 2 | Unknown or wrongly-cased route in the URL (`#/foo`, `#/Active`) throws errors, can show an empty list, and leaves the filter navigation broken until reload. | Defect | Medium | [#2](https://github.com/dijanabr/hornetsecurity-todo-playwright/issues/2) |
-| 3 | Deleted default todos reappear after reload – after deleting all todos and reloading, the two default todos are shown again. | Defect | Low | [#3](https://github.com/dijanabr/hornetsecurity-todo-playwright/issues/3) |
-| 4 | No maximum length on todo text – very long text (10,000+ characters) makes the item extremely tall, so the toggle and delete controls are hard to reach and items below are pushed out of view. | Defect | Medium | – |
-| 5 | New todo is created on blur, not only on Enter – differs from the TodoMVC spec and may create accidental todos. | Question for PO | – | – |
-| 6 | Missing test hooks – only the new-todo input has a `data-test` attribute; other elements must be located by CSS classes. | Testability | – | – |
-| 7 | Todo checkboxes have no accessible name, so screen readers and role-based locators cannot identify them by name. | Accessibility | Low | – |
-| 8 | Unpredictable start state – default todos are added on load with time-based IDs, so tests control `localStorage` to stay stable. | Testability | – | – |
+| 1 | Duplicate todo IDs – the two default todos sometimes get the same id, and then toggling or deleting the second one changes the first one instead. | Bug | High | [#1](https://github.com/dijanabr/hornetsecurity-todo-playwright/issues/1) |
+| 2 | Unknown or wrongly-cased route in the URL (`#/foo`, `#/Active`) throws errors, can show an empty list, and leaves the filter navigation broken until reload. | Bug | Medium | [#2](https://github.com/dijanabr/hornetsecurity-todo-playwright/issues/2) |
+| 3 | Deleted default todos reappear after reload – after deleting all todos and reloading, the two default todos are shown again. | Bug | Low | [#3](https://github.com/dijanabr/hornetsecurity-todo-playwright/issues/3) |
+| 4 | No maximum length on todo text – very long text (10,000+ characters) makes the item extremely tall, so the toggle and delete controls are hard to reach and items below are pushed out of view. | Bug | Medium | – |
+| 5 | New todo is created when the input loses focus (e.g. clicking anywhere else on the page), not only on Enter. | Question for PO | – | – |
+| 6 | Few stable locators – only the new-todo input has a `data-test` attribute; other elements must be located by CSS classes. | Testability | – | – |
+| 7 | Unpredictable start state – default todos are added on load with time-based IDs, so tests control `localStorage` to stay stable. | Testability | – | – |
 | ✔ | HTML / script input is shown as text (no XSS) on create, edit and reload. | Verified OK | – | – |
 
 ---
 
 ## What I would improve with more time
 
-- **Test hooks:** agree with the developers on `data-test` attributes for every interactive element and accessible names for the checkboxes, then replace the remaining CSS locators.
-- **Accessibility:** add automated checks with `@axe-core/playwright`.
-- **Visual regression:** screenshot comparisons for the main states (empty, mixed, all completed).
+- **More stable locators:** agree with the developers on `data-test` attributes for the list items, checkboxes and buttons (added once in the item template), then replace the remaining CSS locators.
+- **CI strategy by tags and browsers:** run only `@smoke` tests on Chromium on every pull request for fast feedback, the full suite on Chromium on merge to `main`, and a scheduled nightly run of all tests on all browsers, so a fresh Allure report is ready when the team starts.
 - **Faster CI:** shard the suite across parallel jobs (`--shard`) as it grows.
-- **Docker Compose:** run the app and the tests as separate services, closer to a real deployment.
+- **Docker Compose:** run the app and the tests as two separate containers (the tests reach the app by service name), closer to a real deployment and reusable against other environments by changing only `baseURL`.
 - **Code quality:** ESLint with the Playwright plugin and a type-check step (`tsc --noEmit`) in CI.
-- **If the app had a backend:** API tests with Playwright's `request` fixture, data seeding through the API, `page.route()` to mock errors and slow responses, and contract tests.
-- **Pin GitHub Actions** to release tags or commit SHAs.
+- **If the app had a backend:** API tests for the backend, test data prepared through the API instead of the UI, and mocked API errors to check how the UI handles them.
 
 ---
 

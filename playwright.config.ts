@@ -38,7 +38,7 @@ export default defineConfig({
 
     {
       name: 'mobile-chrome',
-      use: { ...devices['Pixel 7'] }
+      use: { ...devices['Galaxy S24'] }
     },
   ],
 
