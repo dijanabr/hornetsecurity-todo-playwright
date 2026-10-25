@@ -296,20 +296,19 @@ The Playwright `list` reporter is kept for readable console and CI logs, and the
 
 ## Quality findings
 
-Full details (steps to reproduce, expected/actual, root cause, suggested fix) are in [FINDINGS.md](FINDINGS.md).
+Short descriptions of all findings are in [FINDINGS.md](FINDINGS.md); the three defects with steps to reproduce and evidence are reported as GitHub issues.
 
 | # | Finding | Type | Severity | Issue |
 | --- | --- | --- | --- | --- |
-| 1 | Duplicate todo IDs – IDs come from `Date.getTime()`, so todos created in the same millisecond (e.g. the two default todos, about half of fresh loads) share an ID, and toggling or deleting the second one changes the first one instead. | Defect | High | [#1](https://github.com/dijanabr/hornetsecurity-todo-playwright/issues/1) |
-| 2 | Unvalidated route in the URL hash – unknown or wrongly-cased routes (`#/foo`, `#/Active`) throw errors, can show an empty list, and leave the filter navigation broken until reload. | Defect | Medium | [#2](https://github.com/dijanabr/hornetsecurity-todo-playwright/issues/2) |
-| 3 | Deleted default todos reappear after reload – the app re-seeds whenever the list is empty, so a user cannot keep an empty list. | Defect | Medium | [#3](https://github.com/dijanabr/hornetsecurity-todo-playwright/issues/3) |
-| 4 | No maximum length on todo text – very long text (10,000+ characters) makes the item extremely tall, so the toggle and delete controls are hard to find and items below are pushed out of view. | Defect | Medium | – |
-| 5 | New todo is created on blur, not only on Enter – differs from the TodoMVC spec and may create accidental todos. | Unclear behaviour (question for PO) | – | – |
+| 1 | Duplicate todo IDs – the two default todos sometimes get the same id, and then toggling or deleting the second one changes the first one instead. | Defect | High | [#1](https://github.com/dijanabr/hornetsecurity-todo-playwright/issues/1) |
+| 2 | Unknown or wrongly-cased route in the URL (`#/foo`, `#/Active`) throws errors, can show an empty list, and leaves the filter navigation broken until reload. | Defect | Medium | [#2](https://github.com/dijanabr/hornetsecurity-todo-playwright/issues/2) |
+| 3 | Deleted default todos reappear after reload – after deleting all todos and reloading, the two default todos are shown again. | Defect | Low | [#3](https://github.com/dijanabr/hornetsecurity-todo-playwright/issues/3) |
+| 4 | No maximum length on todo text – very long text (10,000+ characters) makes the item extremely tall, so the toggle and delete controls are hard to reach and items below are pushed out of view. | Defect | Medium | – |
+| 5 | New todo is created on blur, not only on Enter – differs from the TodoMVC spec and may create accidental todos. | Question for PO | – | – |
 | 6 | Missing test hooks – only the new-todo input has a `data-test` attribute; other elements must be located by CSS classes. | Testability | – | – |
-| 7 | Todo checkboxes have no accessible name and are visually hidden, so screen readers and role-based locators cannot identify them by name. | Accessibility / testability | – | – |
-| 8 | Delete button is visible only on hover, which is hard to discover on touch devices. | Accessibility / UX | Low | – |
-| 9 | Non-deterministic default data – default todos are added on load with time-based IDs, so tests must control `localStorage` to stay stable. | Testability | – | – |
-| ✔ | HTML / script input is escaped correctly (no XSS) on create, edit and reload. | Verified OK | – | – |
+| 7 | Todo checkboxes have no accessible name, so screen readers and role-based locators cannot identify them by name. | Accessibility | Low | – |
+| 8 | Unpredictable start state – default todos are added on load with time-based IDs, so tests control `localStorage` to stay stable. | Testability | – | – |
+| ✔ | HTML / script input is shown as text (no XSS) on create, edit and reload. | Verified OK | – | – |
 
 ---
 
