@@ -1,0 +1,116 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: knownIssues.spec.ts >> Known issues >> when storage is empty >> toggling the second default todo changes only that todo
+- Location: tests/knownIssues.spec.ts:10:14
+
+# Error details
+
+```
+Error: expect(locator).not.toBeChecked() failed
+
+Locator:  locator('.todo-list').getByRole('listitem').filter({ has: getByText('Pay electric bill', { exact: true }) }).getByRole('checkbox')
+Expected: not checked
+Received: checked
+Timeout:  5000ms
+
+Call log:
+  - Expect "not toBeChecked" locator('.todo-list').getByRole('listitem').filter({ has: getByText('Pay electric bill', { exact: true }) }).getByRole('checkbox') with timeout 5000ms
+  - waiting for locator('.todo-list').getByRole('listitem').filter({ has: getByText('Pay electric bill', { exact: true }) }).getByRole('checkbox')
+    14 × locator resolved to <input class="toggle" type="checkbox"/>
+       - unexpected value "checked"
+
+```
+
+```yaml
+- checkbox [checked]
+```
+
+# Test source
+
+```ts
+  1  | import { test, expect, testData, knownIssues } from '../fixtures/todoFixtures';
+  2  | 
+  3  | test.use({ screenshot: 'on', video: 'on', trace: 'on' });
+  4  | 
+  5  | // Expected to fail while the linked bug is open (see README → Known defects).
+  6  | test.describe('Known issues', { tag: '@known-issue' }, () => {
+  7  |     test.describe('when storage is empty', () => {
+  8  |         test.use({ seedList: 'none' });
+  9  | 
+  10 |         test.fail('toggling the second default todo changes only that todo',
+  11 |             {
+  12 |                 annotation: [
+  13 |                     { type: 'issue', description: knownIssues.duplicateIds },
+  14 |                     { type: 'bug', description: 'Toggling the second default todo changes the first one' },
+  15 |                 ],
+  16 |             },
+  17 |             async ({ todoPage, page, todoStorage }) => {
+  18 |                 // Freeze time so both default todos get the same id - makes the intermittent bug reproducible.
+  19 |                 await page.clock.setFixedTime(new Date('2026-10-25T10:00:00Z'));
+  20 |                 await todoStorage.clearAndReload();
+  21 |                 await todoPage.toggleTodo('Walk the dog');
+  22 |                 await expect(todoPage.itemCheckbox('Walk the dog')).toBeChecked();
+> 23 |                 await expect(todoPage.itemCheckbox('Pay electric bill')).not.toBeChecked();
+     |                                                                              ^ Error: expect(locator).not.toBeChecked() failed
+  24 |             },
+  25 |         );
+  26 | 
+  27 |         test.fail('deleted default todos stay deleted after reload',
+  28 |             {
+  29 |                 annotation: [
+  30 |                     { type: 'issue', description: knownIssues.defaultTodosReappear },
+  31 |                     { type: 'bug', description: 'Deleted default todos reappear after reload' },
+  32 |                 ],
+  33 |             },
+  34 |             async ({ todoPage }) => {
+  35 |                 for (const title of testData.defaultTodos) {
+  36 |                     await todoPage.deleteTodo(title);
+  37 |                 }
+  38 |                 await todoPage.reloadPage();
+  39 |                 await expect(todoPage.todoItems).toHaveCount(0);
+  40 |             },
+  41 |         );
+  42 |     });
+  43 | 
+  44 |     test.fail('an unknown route falls back to "All" without errors',
+  45 |         {
+  46 |             annotation: [
+  47 |                 { type: 'issue', description: knownIssues.unvalidatedRoute },
+  48 |                 { type: 'bug', description: 'Unknown route shows an empty list and a Console error' },
+  49 |             ],
+  50 |         },
+  51 |         async ({ todoPage, page }) => {
+  52 |             const errors: string[] = [];
+  53 |             page.on('pageerror', (error) => errors.push(error.message));
+  54 |             await page.goto('/todo#/unknown');
+  55 |             await todoPage.reloadPage();
+  56 |             await expect(todoPage.todoItems).toHaveCount(testData.lists.mixed.length);
+  57 |             expect(errors).toEqual([]);
+  58 |         },
+  59 |     );
+  60 | 
+  61 |     test.fail('a wrongly-cased route keeps the filter navigation working',
+  62 |         {
+  63 |             annotation: [
+  64 |                 { type: 'issue', description: knownIssues.unvalidatedRoute },
+  65 |                 { type: 'bug', description: 'Wrongly-cased route breaks the filter highlight' },
+  66 |             ],
+  67 |         },
+  68 |         async ({ todoPage, page }) => {
+  69 |             const errors: string[] = [];
+  70 |             page.on('pageerror', (error) => errors.push(error.message));
+  71 |             await page.goto('/todo#/Active');
+  72 |             await todoPage.filterBy('Completed');
+  73 |             await expect(todoPage.filterLink('Completed')).toHaveClass('selected');
+  74 |             expect(errors).toEqual([]);
+  75 |         },
+  76 |     );
+  77 | });
+  78 | 
+```
