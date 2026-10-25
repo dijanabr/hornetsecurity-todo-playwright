@@ -1,0 +1,12 @@
+{
+    "heading": "todos",
+    "placeholder": "What needs to be done?",
+    "toggleAllLabel": "Mark all as complete",
+    "filters": [
+        "All",
+        "Active",
+        "Completed"
+    ],
+    "clearCompleted": "Clear completed",
+    "editHint": "Double-click to edit a todo"
+}

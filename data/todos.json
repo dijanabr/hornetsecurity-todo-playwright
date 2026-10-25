@@ -1,0 +1,62 @@
+{
+    "storageKey": "todos-vanillajs",
+    "defaultTodos": [
+        "Pay electric bill",
+        "Walk the dog"
+    ],
+    "lists": {
+        "mixed": [
+            {
+                "title": "Buy groceries",
+                "completed": false
+            },
+            {
+                "title": "Book dentist appointment",
+                "completed": true
+            },
+            {
+                "title": "Prepare QA report",
+                "completed": false
+            }
+        ],
+        "allActive": [
+            {
+                "title": "Buy groceries",
+                "completed": false
+            },
+            {
+                "title": "Prepare QA report",
+                "completed": false
+            }
+        ],
+        "allCompleted": [
+            {
+                "title": "Book dentist appointment",
+                "completed": true
+            },
+            {
+                "title": "Renew passport",
+                "completed": true
+            }
+        ],
+        "single": [
+            {
+                "title": "Buy groceries",
+                "completed": false
+            }
+        ]
+    },
+    "input": {
+        "newTitle": "Write Playwright tests",
+        "secondTitle": "Review pull request",
+        "titleWithSpaces": "   Trim me please   ",
+        "whitespaceOnly": "      ",
+        "editedTitle": "Buy groceries and fruit",
+        "specialCharacters": "Café & résumé – naïve ✓ \"quotes\" 'apostrophes' Ђорѓе Љубљана",
+        "xssPayloads": [
+            "<img src=x onerror=\"window.__xss = true\">",
+            "<script>window.__xss = true</script>",
+            "<b>bold text</b>"
+        ]
+    }
+}
