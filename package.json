@@ -1,0 +1,26 @@
+{
+  "name": "hornetsecurity-todo-playwright",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start:app": "serve app -l 8080"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dijanabr/hornetsecurity-todo-playwright.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/dijanabr/hornetsecurity-todo-playwright/issues"
+  },
+  "homepage": "https://github.com/dijanabr/hornetsecurity-todo-playwright#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^26.6.5",
+    "serve": "^14.2.6"
+  }
+}
