@@ -1,5 +1,5 @@
 import { test as base, Page, expect } from '@playwright/test';
-import { TodoPage } from '../pages/todoPage';
+import TodoPage from '../pages/todoPage';
 import testData from '../data/todos.json';
 import ui from '../data/ui.json';
 import knownIssues from '../data/knownIssues.json';

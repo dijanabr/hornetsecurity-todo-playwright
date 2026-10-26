@@ -1,8 +1,7 @@
 {
   "name": "hornetsecurity-todo-playwright",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Playwright + TypeScript E2E tests for the ToDo app, with Docker, GitHub Actions and Allure",
   "scripts": {
     "start:app": "serve app -l 8080 --no-clipboard",
     "test": "playwright test",

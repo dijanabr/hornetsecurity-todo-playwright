@@ -42,7 +42,7 @@ jobs:
 
       - name: Set up Java (needed by Allure CLI)
         if: always()
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 17
@@ -64,7 +64,7 @@ jobs:
 
       - name: Upload raw results and Playwright report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-results
           path: |

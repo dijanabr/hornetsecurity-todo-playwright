@@ -54,7 +54,7 @@ test.describe('Read todos', () => {
 test.describe('Item counter', () => {
     test.use({ seedList: 'allActive' });
 
-    test('uses correctly how items are counted', async ({ todoPage }) => {
+    test('updates the item counter as todos are completed', async ({ todoPage }) => {
         await expect(todoPage.itemCounter).toHaveText('2 items left');
         await todoPage.toggleTodo('Buy groceries');
         await expect(todoPage.itemCounter).toHaveText('1 item left');

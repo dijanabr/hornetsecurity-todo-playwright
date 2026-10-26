@@ -4,7 +4,7 @@ import ui from '../data/ui.json';
 
 export type FilterName = 'All' | 'Active' | 'Completed';
 
-export class TodoPage extends BasePage {
+export default class TodoPage extends BasePage {
     public heading: Locator;
     public newTodoInput: Locator;
     public toggleAllCheckbox: Locator;
